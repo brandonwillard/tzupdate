@@ -14,6 +14,8 @@ import errno
 import logging
 import collections
 
+import sh
+
 from multiprocessing import Queue, Process
 
 try:
@@ -238,8 +240,11 @@ def main(argv=None, services=SERVICES):
     if args.print_only:
         print(timezone)
     else:
-        link_localtime(timezone, args.zoneinfo_path, args.localtime_path)
-        write_debian_timezone(timezone, args.debian_timezone_path)
+        try:
+            sh.timedatectl('set-timezone', timezone)
+        except sh.CommandNotFound:
+            link_localtime(timezone, args.zoneinfo_path, args.localtime_path)
+            write_debian_timezone(timezone, args.debian_timezone_path)
         print('Set system timezone to %s.' % timezone)
 
 
